@@ -1,7 +1,3 @@
-params.datadir = '../methylkit_analysis/'
-
-params.coverage_dir = "../coverage_dir/"
-
 process data_prep {
     // Pass the parameter to the R script
     input:
