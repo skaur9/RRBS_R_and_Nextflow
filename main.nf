@@ -1,6 +1,6 @@
-params.datadir = '/home/projects/cu_10031/data/raw/DNBC_methylation_2023/2025_analysis/methylkit_analysis/'
+params.datadir = '../methylkit_analysis/'
 
-params.coverage_dir = "/home/projects/cu_10031/data/raw/DNBC_methylation_2023/2025_analysis/child_dataset"
+params.coverage_dir = "../coverage_dir/"
 
 process data_prep {
     // Pass the parameter to the R script
