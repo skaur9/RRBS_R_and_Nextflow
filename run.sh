@@ -4,8 +4,8 @@
 
 # Define the output directory 
 OUTDIR="./results" 
-COVARS_FILE="/home/projects/cu_10031/data/raw/DNBC_methylation_2023/2025_analysis/methylkit_analysis/covars_all.csv"
-COVERAGE_DIR="/home/projects/cu_10031/data/raw/DNBC_methylation_2023/2025_analysis/child_dataset/"
+COVARS_FILE="/*****/covars_all.csv"
+COVERAGE_DIR="/****/dataset/"
 
 # --- 2. Load Nextflow/Container Modules ---
 
