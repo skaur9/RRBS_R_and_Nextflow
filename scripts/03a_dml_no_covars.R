@@ -3,6 +3,18 @@
 # Setup
 library(methylKit)
 
+# 1. Read the new, explicit environment variable
+num.cores <- as.numeric(Sys.getenv("R_NUM_CORES")) 
+
+# 2. Add a sanity check to prevent the NA error
+if (is.na(num.cores) || num.cores < 1) {
+    num.cores <- 1 # Default to 1 if not set
+}
+
+# 3. Register the cores
+library(BiocParallel)
+register(MulticoreParam(workers = num.cores))
+
 # Set the output directory
 output_dir <- "results/dml_no_covars"
 
@@ -14,14 +26,18 @@ myDiff_DMR <- calculateDiffMeth(
   meth.min,
   overdispersion = "MN",
   test = "Chisq",
-  mc.cores = 8
+  suffix = "no_covars"
+  #mc.cores = 12
 )
 
 # Get significant DMLs
 sigDMLs_myDiff_DMR <- getMethylDiff(myDiff_DMR, difference = 10, qvalue = 0.01)
+myDiff25p_myDiff_DMR <- getMethylDiff(sigDMLs_myDiff_DMR, difference = 25, qvalue = 0.01)
 
 # Write results to file in the output directory
 write.table(getData(sigDMLs_myDiff_DMR), file = file.path(output_dir, "differential_methylation_results_no_covars.tsv"), sep = "\t", quote = FALSE)
+
+write.table(getData(myDiff25p_myDiff_DMR), file = file.path(output_dir, "myDiff25p_myDiff_DMR.txt"), sep = "\t", quote = FALSE)
 
 # Visualize the distribution of hypo/hyper-methylated bases/regions per chromosome.
 pdf(file.path(output_dir, "diffMethPerChr_myDiff_DMR.pdf"), h = 10, w = 16)

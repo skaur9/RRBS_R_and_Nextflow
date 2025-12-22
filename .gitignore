@@ -1,0 +1,6 @@
+work/
+results/
+.nextflow.log*
+nextflow_trace.txt
+runInfo/
+covars_all.csv

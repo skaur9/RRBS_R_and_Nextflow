@@ -52,11 +52,69 @@ ggplot(pca.df, aes(PC1, PC2, color = BMI_child)) + geom_point() + theme_minimal(
 dev.off()
 
 # Correlation plot of covariates
-numeric.covs <- design.df[, c("mage", "BMI_mother", "BMI_child", "ga")]
-cor.mat <- cor(numeric.covs, use = "pairwise.complete.obs")
-p.mat <- cor.p(numeric.covs) # You'll need to define the cor.p function
-corrplot::corrplot(cor.mat, method = "circle")
-corrplot::corrplot(cor.mat, method = "color", type = "upper", order = "hclust", addCoef.col = "black", tl.col = "black", p.mat = p.mat, sig.level = 0.05, insig = "blank")
 
-# Save the current state if needed
+# Create a correlation matrix to identify highly correlated variables and exclude them from downstream analysis
+
+cor.mat <- cor(design.df[, c("sex", "mage", "BMI_mother", "BMI_child", "ga", "alcohol", "diab_mother", "diab_child", "rygning1", "rygning2")], use = "complete.obs")
+corrplot::corrplot(cor.mat, method = "circle")
+
+
+# Plot All numeric variables to idendtify corrlated variables 
+
+# 1. Select numeric covariates starting from column 9
+numeric.covs <- design.df[, 9:ncol(design.df)]
+
+# Drop variables with more than 50% missing
+numeric.covs <- numeric.covs[, colMeans(is.na(numeric.covs)) < 0.5]
+
+# Drop rows with too many missing values
+numeric.covs <- numeric.covs[rowMeans(is.na(numeric.covs)) < 0.5, ]
+
+# 4. Compute correlation matrix
+cor.mat <- cor(numeric.covs, use = "pairwise.complete.obs")
+
+# 5. Function to compute p-values
+cor.p <- function(mat) {
+  n <- ncol(mat)
+  p.mat <- matrix(NA, n, n)
+  colnames(p.mat) <- rownames(p.mat) <- colnames(mat)
+  for (i in 1:n) {
+    for (j in 1:n) {
+      test <- suppressWarnings(cor.test(mat[, i], mat[, j]))
+      p.mat[i, j] <- test$p.value
+    }
+  }
+  p.mat
+}
+p.mat <- cor.p(numeric.covs)
+
+pdf("corrplot.pdf", h = 10, w = 16)
+# Plot
+corrplot::corrplot(cor.mat, method = "circle")
+
+
+# 6. draw the upper triangle of the correlation matrix (to avoid duplicating mirrored values).
+# Color correlations by strength (blue = negative, red = positive).
+# hide insignificant correlations
+
+corrplot::corrplot(
+  cor.mat,
+  method = "color",
+  type = "upper",
+  order = "hclust",
+  addCoef.col = "black",
+  tl.col = "black",
+  tl.srt = 45,
+  tl.cex = 0.8,
+  number.cex = 0.6,
+  p.mat = p.mat,        # matrix of p-values
+  sig.level = 0.05,     # significance cutoff
+  insig = "blank",        # mark insignificant as blank
+  pch.cex = 2,          # size of the significance symbol
+  pch.col = "black",    # color of the significance symbol
+  col = colorRampPalette(c("blue", "white", "red"))(200)
+)
+dev.off()
+
+# Save the current state 
 save.image(file="qc_and_plots.RData")
